@@ -23,13 +23,20 @@
     .sidebar .avatar {
         width: 42px;
         height: 42px;
-        border-radius: 8px;
+        border-radius: 50%;
         background: #0d6efd;
         color: #fff;
         font-weight: bold;
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
+    }
+
+    .sidebar .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
     .sidebar-menu {
@@ -63,7 +70,16 @@
     @auth
         <div class="sidebar-header">
             <div class="avatar">
-                {{ strtoupper(substr(auth()->user()->username, 0, 1)) }}
+                 @if($user->profile && file_exists(storage_path('app/public/' . $user->profile)))
+                        <img src="{{ asset('storage/' . $user->profile) }}" 
+                             alt="Avatar" class="rounded-circle" 
+                             style="width:50px; height:50px; object-fit:cover;">
+                    @else
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                             style="width:50px; height:50px; font-weight:bold;">
+                            {{ strtoupper(substr($user->username,0,1)) }}
+                        </div>
+                    @endif
             </div>
             <div>
                 <div class="fw-bold">{{ auth()->user()->username }}</div>
@@ -78,28 +94,18 @@
         </div>
 
         <div class="sidebar-menu">
-            <a href="{{ route('dashboard') }}" class="sidebar-link">
-                Dashboard
-            </a>
+            <a href="{{ route('dashboard') }}" class="sidebar-link">Dashboard</a>
 
             @if(auth()->user()->role === App\Models\User::ROLE_ADMIN)
-                <a href="{{ route('admin.users.index') }}" class="sidebar-link">
-                    Manage Users
-                </a>
-                <a href="{{ route('admin.announcements.index') }}" class="sidebar-link">
-                    Announcements
-                </a>
+                <a href="{{ route('admin.users.index') }}" class="sidebar-link">Manage Users</a>
+                <a href="{{ route('admin.announcements.index') }}" class="sidebar-link">Announcements</a>
             @endif
 
             @if(auth()->user()->role === App\Models\User::ROLE_INSTRUCTOR)
-                <a href="#" class="sidebar-link">
-                    Courses
-                </a>
+                <a href="#" class="sidebar-link">Courses</a>
             @endif
 
-            <a href="{{ route('profile.edit') }}" class="sidebar-link">
-                My Profile
-            </a>
+            <a href="{{ route('profile.edit') }}" class="sidebar-link">My Profile</a>
         </div>
     @else
         <div class="p-3">

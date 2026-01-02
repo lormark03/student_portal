@@ -5,91 +5,96 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(\App\Http\Middleware\IsAdmin::class);
-    }
-
+    // Display list of users
     public function index()
     {
-        $users = User::paginate(15);
+        $users = User::latest()->paginate(10); // fetch all users with pagination
         return view('admin.users.index', compact('users'));
     }
 
-    public function create()
-    {
-        return view('admin.users.create');
-    }
-
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'username' => 'required|string|max:191|unique:users,username',
-            'email' => 'required|email|max:191|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:0,1,3',
-            'profile' => 'nullable|string|max:255',
-            'profile_image' => 'nullable|image|max:2048',
-        ]);
-
-        $data['password'] = Hash::make($data['password']);
-
-        if ($request->hasFile('profile_image')) {
-            $data['profile'] = $request->file('profile_image')->store('profile_images', 'public');
-        }
-
-        User::create($data);
-
-        return redirect()->route('admin.users.index')->with('status', 'User created');
-    }
-
+    // Show user details
     public function show(User $user)
     {
         return view('admin.users.show', compact('user'));
     }
 
+    // Show create form
+    public function create()
+    {
+        return view('admin.users.create');
+    }
+
+    // Store new user
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'username' => 'required|string|max:50',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|in:admin,instructor,student',
+            'profile_image' => 'nullable|image|max:2048',
+        ]);
+
+        if ($request->hasFile('profile_image')) {
+            $data['profile'] = $request->file('profile_image')->store('profile_images', 'public');
+        }
+
+        $data['password'] = bcrypt($data['password']);
+
+        User::create($data);
+
+        return redirect()->route('admin.users.index')->with('status', 'User created successfully.');
+    }
+
+    // Show edit form
     public function edit(User $user)
     {
         return view('admin.users.edit', compact('user'));
     }
 
+    // Update user
     public function update(Request $request, User $user)
     {
         $data = $request->validate([
-            'username' => 'required|string|max:191|unique:users,username,' . $user->id,
-            'email' => 'required|email|max:191|unique:users,email,' . $user->id,
+            'username' => 'required|string|max:50',
+            'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
-            'role' => 'required|in:0,1,3',
-            'profile' => 'nullable|string|max:255',
+            'role' => 'required|in:admin,instructor,student',
             'profile_image' => 'nullable|image|max:2048',
         ]);
 
-        if (!empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
+        if ($request->filled('password')) {
+            $data['password'] = bcrypt($data['password']);
         } else {
             unset($data['password']);
         }
 
-        // handle profile image
         if ($request->hasFile('profile_image')) {
-            if ($user->profile && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->profile)) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile);
+            // Delete old profile if exists
+            if ($user->profile && \Storage::disk('public')->exists($user->profile)) {
+                \Storage::disk('public')->delete($user->profile);
             }
+
             $data['profile'] = $request->file('profile_image')->store('profile_images', 'public');
         }
 
         $user->update($data);
 
-        return redirect()->route('admin.users.index')->with('status', 'User updated');
+        return redirect()->route('admin.users.index')->with('status', 'User updated successfully.');
     }
 
+    // Delete user
     public function destroy(User $user)
     {
+        if ($user->profile && \Storage::disk('public')->exists($user->profile)) {
+            \Storage::disk('public')->delete($user->profile);
+        }
+
         $user->delete();
-        return redirect()->route('admin.users.index')->with('status', 'User deleted');
+
+        return redirect()->route('admin.users.index')->with('status', 'User deleted successfully.');
     }
 }

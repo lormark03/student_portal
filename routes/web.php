@@ -23,6 +23,7 @@ Route::post('logout', [AuthController::class, 'logout'])->middleware('auth')->na
     Route::middleware('auth')->group(function () {
         Route::get('profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+        
     });
 // Role-based dashboards
 Route::middleware(['auth'])->group(function () {
