@@ -61,18 +61,28 @@
             border-bottom: 1px solid #dee2e6;
         }
 
+        /* ================= AVATAR ================= */
         .avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 8px;
-            background: #0d6efd;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;       /* perfect circle */
+            background: #0d6efd;      /* fallback bg color */
             color: #fff;
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;         /* ensures image doesn't overflow */
+            flex-shrink: 0;
         }
 
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;        /* cover the circle perfectly */
+        }
+
+        /* ================= SIDEBAR LINKS ================= */
         .sidebar-menu {
             flex: 1;
             overflow-y: auto;
@@ -113,7 +123,7 @@
 {{-- ================= HEADER ================= --}}
 <header class="app-header">
     <span class="fw-bold h5 mb-0">Student Portal System</span>
- @auth
+    @auth
         <span class="small text-muted">{{ auth()->user()->username }}</span>
     @endauth
 </header>
@@ -121,13 +131,21 @@
 {{-- ================= SIDEBAR ================= --}}
 <div class="sidebar">
     @auth
+        @php $user = auth()->user(); @endphp
+
         {{-- User Info --}}
         <div class="sidebar-header">
-            <div class="avatar">{{ strtoupper(substr(auth()->user()->username, 0, 1)) }}</div>
+            <div class="avatar">
+                @if($user->profile && file_exists(storage_path('app/public/' . $user->profile)))
+                    <img src="{{ asset('storage/' . $user->profile) }}" alt="Avatar">
+                @else
+                    {{ strtoupper(substr($user->username, 0, 1)) }}
+                @endif
+            </div>
             <div>
-                <div class="fw-bold">{{ auth()->user()->username }}</div>
+                <div class="fw-bold">{{ $user->username }}</div>
                 <div class="text-muted small">
-                    @switch(auth()->user()->role)
+                    @switch($user->role)
                         @case(App\Models\User::ROLE_ADMIN) Admin @break
                         @case(App\Models\User::ROLE_INSTRUCTOR) Instructor @break
                         @default Student
@@ -140,19 +158,19 @@
         <div class="sidebar-menu">
             <a href="{{ route('dashboard') }}" class="sidebar-link">Dashboard</a>
 
-            @if(auth()->user()->role === App\Models\User::ROLE_ADMIN)
+            @if($user->role === App\Models\User::ROLE_ADMIN)
                 <a href="{{ route('admin.users.index') }}" class="sidebar-link">Manage Users</a>
                 <a href="{{ route('admin.announcements.index') }}" class="sidebar-link">Announcements</a>
             @endif
 
-            @if(auth()->user()->role === App\Models\User::ROLE_INSTRUCTOR)
+            @if($user->role === App\Models\User::ROLE_INSTRUCTOR)
                 <a href="#" class="sidebar-link">Courses</a>
             @endif
 
             <a href="{{ route('profile.edit') }}" class="sidebar-link">My Profile</a>
         </div>
 
-        {{-- Sidebar Logout (optional extra) --}}
+        {{-- Sidebar Logout --}}
         <div class="sidebar-logout">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf

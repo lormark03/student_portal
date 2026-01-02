@@ -5,17 +5,18 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 use Illuminate\Http\Request;
+use App\Http\Middleware\IsAdmin;
 
 class AnnouncementController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'is_admin']);
+        $this->middleware(['auth', IsAdmin::class]);
     }
 
     public function index()
     {
-        $announcements = Announcement::latest()->paginate(15);
+        $announcements = Announcement::latest()->paginate(10);
         return view('admin.announcements.index', compact('announcements'));
     }
 
@@ -29,15 +30,19 @@ class AnnouncementController extends Controller
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'body' => 'required|string',
-            'is_active' => 'nullable|boolean',
+            'is_active' => 'nullable',
         ]);
 
-        $data['is_active'] = $request->has('is_active');
-        $data['user_id'] = auth()->id();
+        Announcement::create([
+            'title' => $data['title'],
+            'body' => $data['body'],
+            'is_active' => $request->has('is_active'),
+            'user_id' => auth()->id(),
+        ]);
 
-        Announcement::create($data);
-
-        return redirect()->route('admin.announcements.index')->with('success', 'Announcement created.');
+        return redirect()
+            ->route('admin.announcements.index')
+            ->with('success', 'Announcement created successfully.');
     }
 
     public function edit(Announcement $announcement)
@@ -50,19 +55,26 @@ class AnnouncementController extends Controller
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'body' => 'required|string',
-            'is_active' => 'nullable|boolean',
+            'is_active' => 'nullable',
         ]);
 
-        $data['is_active'] = $request->has('is_active');
+        $announcement->update([
+            'title' => $data['title'],
+            'body' => $data['body'],
+            'is_active' => $request->has('is_active'),
+        ]);
 
-        $announcement->update($data);
-
-        return redirect()->route('admin.announcements.index')->with('success', 'Announcement updated.');
+        return redirect()
+            ->route('admin.announcements.index')
+            ->with('success', 'Announcement updated successfully.');
     }
 
     public function destroy(Announcement $announcement)
     {
         $announcement->delete();
-        return back()->with('success', 'Announcement deleted.');
+
+        return redirect()
+            ->route('admin.announcements.index')
+            ->with('success', 'Announcement deleted successfully.');
     }
 }

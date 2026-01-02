@@ -8,22 +8,21 @@
     </div>
 </div>
 
-<div class="row g-3">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">My Courses</h5>
-                <p class="card-text">You have no courses yet. Use the links in the sidebar to create content or manage classes.</p>
-                <a href="#" class="btn btn-sm btn-primary">Create Course</a>
-            </div>
-        </div>
-    </div>
 
-    <div class="col-md-6">
-        <div class="card">
+<div class="row g-3">
+    <div class="col-12">
+        <div class="card shadow-sm">
             <div class="card-body">
-                <h5 class="card-title">Recent Activity</h5>
-                <p class="card-text">No recent activity.</p>
+                <h6 class="card-title">📢 Announcements</h6>
+                @forelse($announcements as $announcement)
+                    <div class="border rounded p-3 mb-3">
+                        <h6>{{ $announcement->title }}</h6>
+                        <p class="small text-muted">Posted {{ $announcement->created_at->diffForHumans() }}</p>
+                        <p>{{ $announcement->body }}</p>
+                    </div>
+                @empty
+                    <p class="text-muted mb-0">No announcements available.</p>
+                @endforelse
             </div>
         </div>
     </div>

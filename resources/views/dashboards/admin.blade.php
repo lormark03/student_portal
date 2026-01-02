@@ -8,74 +8,25 @@
     </p>
 </div>
 
-{{-- STATS --}}
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="text-muted small">Users</div>
-                <div class="h4 mb-0">0</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="text-muted small">Instructors</div>
-                <div class="h4 mb-0">0</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="text-muted small">Courses</div>
-                <div class="h4 mb-0">0</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="text-muted small">Enrollments</div>
-                <div class="h4 mb-0">0</div>
-            </div>
-        </div>
-    </div>
-</div>
-
 {{-- CONTENT ROW --}}
+  
 <div class="row g-3">
-    <div class="col-md-6">
-        <div class="card shadow-sm h-100">
+    <div class="col-12">
+        <div class="card shadow-sm">
             <div class="card-body">
-                <h6 class="card-title">Quick Actions</h6>
-
-                @if(auth()->user()->role === App\Models\User::ROLE_ADMIN)
-                    <a href="{{ route('admin.users.index') }}" class="btn btn-sm btn-primary me-2">
-                        Manage Users
-                    </a>
-                @endif
-
-                <a href="{{ route('profile.edit') }}" class="btn btn-sm btn-outline-secondary">
-                    My Profile
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-6">
-        <div class="card shadow-sm h-100">
-            <div class="card-body">
-                <h6 class="card-title">Recent Activity</h6>
-                <p class="text-muted mb-0 small">
-                    No recent activity available.
-                </p>
+                <h6 class="card-title">📢 Announcements</h6>
+                @forelse($announcements as $announcement)
+                    <div class="border rounded p-3 mb-3">
+                        <h6>{{ $announcement->title }}</h6>
+                        <p class="small text-muted">Posted {{ $announcement->created_at->diffForHumans() }}</p>
+                        <p>{{ $announcement->body }}</p>
+                    </div>
+                @empty
+                    <p class="text-muted mb-0">No announcements available.</p>
+                @endforelse
             </div>
         </div>
     </div>
 </div>
 @endsection
+

@@ -2,9 +2,11 @@
 
 @section('content')
 <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>Announcements</h3>
-        <a href="{{ route('admin.announcements.create') }}" class="btn btn-primary">New Announcement</a>
+    <div class="d-flex justify-content-between mb-3">
+        <h4>Announcements</h4>
+        <a href="{{ route('admin.announcements.create') }}" class="btn btn-primary">
+            New Announcement
+        </a>
     </div>
 
     @if(session('success'))
@@ -14,13 +16,13 @@
     <div class="card">
         <div class="card-body">
             @if($announcements->count())
-                <table class="table">
+                <table class="table table-bordered">
                     <thead>
                         <tr>
                             <th>Title</th>
                             <th>Active</th>
                             <th>Created</th>
-                            <th></th>
+                            <th width="180">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -28,22 +30,30 @@
                         <tr>
                             <td>{{ $a->title }}</td>
                             <td>{{ $a->is_active ? 'Yes' : 'No' }}</td>
-                            <td>{{ $a->created_at->diffForHumans() }}</td>
-                            <td class="text-end">
-                                <a href="{{ route('admin.announcements.edit', $a) }}" class="btn btn-sm btn-secondary">Edit</a>
-                                <form action="{{ route('admin.announcements.destroy', $a) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Delete announcement?')">
+                            <td>{{ $a->created_at->format('M d, Y') }}</td>
+                            <td>
+                                <a href="{{ route('admin.announcements.edit', $a) }}"
+                                   class="btn btn-sm btn-warning">Edit</a>
+
+                                <form action="{{ route('admin.announcements.destroy', $a) }}"
+                                      method="POST"
+                                      class="d-inline"
+                                      onsubmit="return confirm('Delete this announcement?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button class="btn btn-sm btn-danger">Delete</button>
+                                    <button class="btn btn-sm btn-danger">
+                                        Delete
+                                    </button>
                                 </form>
                             </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
+
                 {{ $announcements->links() }}
             @else
-                <p class="mb-0">No announcements yet.</p>
+                <p>No announcements found.</p>
             @endif
         </div>
     </div>
