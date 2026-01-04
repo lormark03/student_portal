@@ -5,18 +5,25 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
 use Illuminate\Http\Request;
-use App\Http\Middleware\IsAdmin;
+use App\Http\Middleware\IsAdminOrInstructor;
 
 class AnnouncementController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', IsAdmin::class]);
+        $this->middleware(['auth', IsAdminOrInstructor::class]);
     }
 
     public function index()
     {
-        $announcements = Announcement::latest()->paginate(10);
+        $user = auth()->user();
+
+        if ($user->role === \App\Models\User::ROLE_ADMIN) {
+            $announcements = Announcement::with('user')->latest()->paginate(10);
+        } else {
+            $announcements = Announcement::with('user')->where('user_id', $user->id)->latest()->paginate(10);
+        }
+
         return view('admin.announcements.index', compact('announcements'));
     }
 
@@ -40,8 +47,10 @@ class AnnouncementController extends Controller
             'user_id' => auth()->id(),
         ]);
 
+        $prefix = auth()->user()->role === \App\Models\User::ROLE_ADMIN ? 'admin' : (auth()->user()->role === \App\Models\User::ROLE_INSTRUCTOR ? 'instructor' : 'admin');
+
         return redirect()
-            ->route('admin.announcements.index')
+            ->route($prefix . '.announcements.index')
             ->with('success', 'Announcement created successfully.');
     }
 
@@ -64,8 +73,10 @@ class AnnouncementController extends Controller
             'is_active' => $request->has('is_active'),
         ]);
 
+        $prefix = auth()->user()->role === \App\Models\User::ROLE_ADMIN ? 'admin' : (auth()->user()->role === \App\Models\User::ROLE_INSTRUCTOR ? 'instructor' : 'admin');
+
         return redirect()
-            ->route('admin.announcements.index')
+            ->route($prefix . '.announcements.index')
             ->with('success', 'Announcement updated successfully.');
     }
 
@@ -73,8 +84,10 @@ class AnnouncementController extends Controller
     {
         $announcement->delete();
 
+        $prefix = auth()->user()->role === \App\Models\User::ROLE_ADMIN ? 'admin' : (auth()->user()->role === \App\Models\User::ROLE_INSTRUCTOR ? 'instructor' : 'admin');
+
         return redirect()
-            ->route('admin.announcements.index')
+            ->route($prefix . '.announcements.index')
             ->with('success', 'Announcement deleted successfully.');
     }
 }

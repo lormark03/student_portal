@@ -2,9 +2,15 @@
 
 @section('content')
 <div class="container">
+    @php
+        $prefix = auth()->user()->role === \App\Models\User::ROLE_ADMIN
+            ? 'admin'
+            : (auth()->user()->role === \App\Models\User::ROLE_INSTRUCTOR ? 'instructor' : 'admin');
+    @endphp
+
     <h3>Create Announcement</h3>
 
-    <form action="{{ route('admin.announcements.store') }}" method="POST">
+    <form action="{{ route($prefix . '.announcements.store') }}" method="POST">
         @csrf
         <div class="mb-3">
             <label class="form-label">Title</label>
@@ -20,7 +26,7 @@
         </div>
 
         <button class="btn btn-primary">Create</button>
-        <a href="{{ route('admin.announcements.index') }}" class="btn btn-link">Cancel</a>
+        <a href="{{ route($prefix . '.announcements.index') }}" class="btn btn-link">Cancel</a>
     </form>
 </div>
 @endsection

@@ -13,7 +13,7 @@
     <div class="col-12">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h6 class="card-title">📢 Announcements</h6>
+                <h6 class="card-title d-flex justify-content-between align-items-center">📢 Announcements <a href="{{ route('instructor.announcements.index') }}" class="btn btn-sm btn-outline-primary">Manage</a></h6>
                 @forelse($announcements as $announcement)
                     <div class="border rounded p-3 mb-3">
                         <h6>{{ $announcement->title }}</h6>

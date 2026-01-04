@@ -64,6 +64,11 @@ Route::prefix('admin')->name('admin.')->middleware(\App\Http\Middleware\IsAdmin:
     Route::resource('announcements', \App\Http\Controllers\Admin\AnnouncementController::class);
 });
 
+// Instructor announcements management (instructors can create/edit/delete their own announcements)
+Route::prefix('instructor')->name('instructor.')->middleware(\App\Http\Middleware\IsInstructor::class)->group(function () {
+    Route::resource('announcements', \App\Http\Controllers\Admin\AnnouncementController::class);
+});
+
 // Instructor dashboard
 Route::get('/instructor/dashboard', function () {
     $announcements = Announcement::where('is_active', true)->latest()->get();

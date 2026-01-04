@@ -164,7 +164,7 @@
             @endif
 
             @if($user->role === App\Models\User::ROLE_INSTRUCTOR)
-                <a href="#" class="sidebar-link">Courses</a>
+                <a href="{{ route('instructor.announcements.index') }}" class="sidebar-link">Announcements</a>
             @endif
 
             <a href="{{ route('profile.edit') }}" class="sidebar-link">My Profile</a>
